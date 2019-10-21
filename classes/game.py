@@ -18,7 +18,7 @@ class Player:
 
     # init method define instance property by using 'self'
     # if property nit found will serche class properties
-    def __init__(self, hp, mp, attack, defence, magic):
+    def __init__(self, hp, mp, attack, defence, magic, items):
         self.max_hp = hp
         self.hp = hp
         self.max_mp = mp
@@ -27,20 +27,14 @@ class Player:
         self.attack_high = attack + 10
         self.defence = defence
         self.magic = magic
-        self.actions = ['Attack', 'Magic']
+        self.items = items
+        self.actions = ['Attack', 'Magic', 'Items']
 
     def generate_damage(self):
         return random.randrange(self.attack_low, self.attack_high)
 
-    def generate_spell_damage(self, spell):
-        magic_low = self.magic[spell]['damage'] - 5
-        magic_high = self.magic[spell]['damage'] + 5
-
-        return random.randrange(magic_low, magic_high)
-
     def take_damage(self, damage):
         self.hp -= damage
-
         if self.hp < 0:
             self.hp = 0
 
@@ -48,7 +42,6 @@ class Player:
 
     def heal(self, damage):
         self.hp += damage
-
         if self.hp > self.max_hp:
             self.hp = self.max_hp
 
@@ -67,24 +60,26 @@ class Player:
     def reduce_mp(self, cost):
         self.mp -= cost
 
-    def get_spell_name(self, spell):
-        return self.magic[spell]['name']
-
-    def get_spell_cost(self, spell):
-        return self.magic[spell]['cost']
-
     def choose_actions(self):
-        action = 1
-        print(Color.OKBLUE + Color.BOLD + "Choose Action" + Color.ENDC)
+        action_index = 1
+        print("\n" + Color.OKBLUE + Color.BOLD + "Choose Action" + Color.ENDC)
 
-        for item in self.actions:
-            print(str(action) + ": " + item)
-            action += 1
+        for action in self.actions:
+            print("    " + str(action_index) + ": " + action)
+            action_index += 1
     
     def choose_spell(self):
         spell_index = 1 
-        print(Color.OKBLUE + Color.BOLD + "Choose Magic Spell" + Color.ENDC)
+        print("\n" + Color.OKBLUE + Color.BOLD + "Choose Magic Spell" + Color.ENDC)
 
         for spell in self.magic:
-            print(str(spell_index) + ": " + spell['name'], "(cost: " + str(spell['cost']) + ")")
+            print("    " + str(spell_index) + ": " + spell.name, "(cost: " + str(spell.cost) + ")", Color.WARNING + Color.BOLD + "(" + spell.type  + ")" + Color.ENDC)
             spell_index += 1
+
+    def choose_item(self):
+        item_index = 1 
+        print("\n" + Color.OKBLUE + Color.BOLD + "Choose Item" + Color.ENDC)
+
+        for item in self.items:
+            print("    " + str(item_index) + ": " + item.name, "(x5)", Color.WARNING + Color.BOLD + "(" + item.description  + ")" + Color.ENDC)
+            item_index += 1
