@@ -17,8 +17,9 @@ class Color:
 class Player:
 
     # init method define instance property by using "self"
-    # if property nit found will serche class properties
-    def __init__(self, hp, mp, attack, defence, magic, items):
+    # if property init found will search class properties
+    def __init__(self, name, hp, mp, attack, defence, magic, items):
+        self.name = name
         self.max_hp = hp
         self.hp = hp
         self.max_mp = mp
@@ -62,24 +63,105 @@ class Player:
 
     def choose_actions(self):
         action_index = 1
-        print("\n" + Color.OKBLUE + Color.BOLD + "Choose Action" + Color.ENDC)
+        print("\n" + "-> " + Color.BOLD + Color.WARNING +self.name + Color.ENDC)
+        print(Color.OKBLUE + Color.BOLD + "    Choose Action" + Color.ENDC)
 
         for action in self.actions:
-            print("    " + str(action_index) + ": " + action)
+            print("        " + str(action_index) + ": " + action)
             action_index += 1
     
     def choose_spell(self):
         spell_index = 1 
-        print("\n" + Color.OKBLUE + Color.BOLD + "Choose Magic Spell" + Color.ENDC)
+        print("\n" + Color.OKBLUE + Color.BOLD + "    Choose Magic Spell" + Color.ENDC)
 
         for spell in self.magic:
-            print("    " + str(spell_index) + ": " + spell.name, "(cost: " + str(spell.cost) + ")", Color.WARNING + Color.BOLD + "(" + spell.type  + ")" + Color.ENDC)
+            print("        " + str(spell_index) + ": " + spell.name, "(cost: " + str(spell.cost) + ")", Color.WARNING + Color.BOLD + "(" + spell.type  + ")" + Color.ENDC)
             spell_index += 1
 
     def choose_item(self):
         item_index = 1 
-        print("\n" + Color.OKBLUE + Color.BOLD + "Choose Item" + Color.ENDC)
+        print("\n" + Color.OKBLUE + Color.BOLD + "    Choose Item" + Color.ENDC)
 
         for item_dictionary in self.items:
-            print("    " + str(item_index) + ": " + item_dictionary["item"].name, Color.FAIL + Color.BOLD + "(x" + str(item_dictionary["quantity"])  + ")", Color.WARNING + Color.BOLD + "(" + item_dictionary["item"].description  + ")" + Color.ENDC)
+            print("        " + str(item_index) + ": " + item_dictionary["item"].name, Color.FAIL + Color.BOLD + "(x" + str(item_dictionary["quantity"])  + ")", Color.WARNING + Color.BOLD + "(" + item_dictionary["item"].description  + ")" + Color.ENDC)
             item_index += 1
+
+    def get_stats(self):
+        """
+            Our HP bar Consists of 25 chars and if it's 100% so it can divided by 4 quartes
+                
+                HP  / Max HP    Get Result Percentage   Divide By 4 And Get Quarter Value
+            Ex: (50 / 200 )      * 100                  / 4
+        """
+        hp_bar = ""
+        hp_bar_ticks = (self.hp / self.max_hp) * 100 / 4
+        
+        """
+            Our MMP bar Consists of 10 chars and if it's 100% so it can divided by 10 pieces
+                
+                MP  / Max MP    Get Result Percentage   Divide By 10 And Get Piece Value
+            Ex: (50 / 200 )      * 100                  / 10
+        """
+        mp_bar = ""
+        mp_bar_ticks = (self.mp / self.max_mp) * 100 / 10
+
+        # Generate HP Bar ticks
+        while hp_bar_ticks > 0:
+            hp_bar += "█"
+            hp_bar_ticks -= 1
+        
+        # Generate HP Bar White Spaces
+        while len(hp_bar) < 25:
+            hp_bar += " "
+
+        # Generate MP Bar Ticks
+        while mp_bar_ticks > 0:
+            mp_bar += "█"
+            mp_bar_ticks -= 1
+        
+        # Generate MP Bar White Spaces
+        while len(mp_bar) < 10:
+            mp_bar += " "
+
+        # Generate proper white spaces for player states
+        hp_string = str(self.hp) + "/" + str(self.max_hp)
+        current_hp = ""
+
+        """
+            9 stands for the complete 9 chars in HP status
+            3000/3000
+        """
+        if len(hp_string) < 9:
+            decreased = 9 - len(hp_string)
+
+            while decreased > 0:
+                current_hp += " "
+                decreased -= 1
+
+            current_hp += hp_string
+        else:
+            current_hp = hp_string
+
+        mp_string = str(self.mp) + "/" + str(self.max_mp)
+        current_mp = ""
+
+        """
+            9 stands for the complete 9 chars in MP status
+            1000/1000
+        """
+        if len(mp_string) < 9:
+            decreased = 9 - len(mp_string)
+
+            while decreased > 0:
+                current_mp += " "
+                decreased -= 1
+
+            current_mp += mp_string
+        else:
+            current_mp = mp_string
+
+        # Print Stats
+        print("\n")
+        print(Color.BOLD + self.name[0:4] + "                      " + 
+                   current_hp + " |" + Color.OKGREEN + hp_bar + Color.ENDC +"|                " + Color.BOLD +
+                   current_mp + " |" + Color.OKBLUE  + mp_bar + Color.ENDC + "|")
