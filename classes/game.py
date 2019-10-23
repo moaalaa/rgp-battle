@@ -3,20 +3,20 @@ import random
 
 # colors class is responsible for terminal background colors
 class Color:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 # Player Class Responsible for all players functions
 class Player:
 
-    # init method define instance property by using 'self'
+    # init method define instance property by using "self"
     # if property nit found will serche class properties
     def __init__(self, hp, mp, attack, defence, magic, items):
         self.max_hp = hp
@@ -28,7 +28,7 @@ class Player:
         self.defence = defence
         self.magic = magic
         self.items = items
-        self.actions = ['Attack', 'Magic', 'Items']
+        self.actions = ["Attack", "Magic", "Items"]
 
     def generate_damage(self):
         return random.randrange(self.attack_low, self.attack_high)
@@ -80,6 +80,6 @@ class Player:
         item_index = 1 
         print("\n" + Color.OKBLUE + Color.BOLD + "Choose Item" + Color.ENDC)
 
-        for item in self.items:
-            print("    " + str(item_index) + ": " + item.name, "(x5)", Color.WARNING + Color.BOLD + "(" + item.description  + ")" + Color.ENDC)
+        for item_dictionary in self.items:
+            print("    " + str(item_index) + ": " + item_dictionary["item"].name, Color.FAIL + Color.BOLD + "(x" + str(item_dictionary["quantity"])  + ")", Color.WARNING + Color.BOLD + "(" + item_dictionary["item"].description  + ")" + Color.ENDC)
             item_index += 1

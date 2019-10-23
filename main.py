@@ -13,13 +13,13 @@ cura = Spell("Cura", 18, 200, "white")
 
 
 # Create Inventory Items
-potion = Item("Postion", 'potion', "Heals 50 HP", 50)
-high_potion = Item("High Postion", 'potion', "Heals 100 HP", 100)
-super_potion = Item("Super Postion", 'potion', "Heals 200 HP", 200)
-elixir = Item("Elixir", 'elixir', "Fully Restores HP/MP of one party member", 9999) #no need for prop number here so give a high one
-high_elixir = Item("High Elixir", 'elixir', "Fully Restores part's HP/MP", 9999) #no need for prop number here so give a high one
+potion = {"item": Item("Postion", 'potion', "Heals 50 HP", 50), "quantity": 5}
+high_potion = {"item": Item("High Postion", 'potion', "Heals 100 HP", 100), "quantity": 3}
+super_potion = {"item": Item("Super Postion", 'potion', "Heals 200 HP", 200), "quantity": 1}
+elixir = {"item": Item("Elixir", 'elixir', "Fully Restores HP/MP of one party member", 9999), "quantity": 2} # no need for prop number here so give a high one
+high_elixir = {"item": Item("High Elixir", 'elixir', "Fully Restores part's HP/MP", 9999), "quantity": 1} # no need for prop number here so give a high one
 
-grenade = Item("Grenade", "attack", "Deals 500 Damage", 500)
+grenade = {"item": Item("Grenade", "attack", "Deals 500 Damage", 500), "quantity": 1}
 
 
 # Players Instance
@@ -82,11 +82,27 @@ while running:
         if item_choice == -1:
             continue
         
-        item = player.items[item_choice]
+        item = player.items[item_choice]["item"]
+        
+        if player.items[item_choice]["quantity"] == 0:
+            print(Color.FAIL + "\n" + item.name + " Not Available in Stock" + Color.ENDC)
+            continue
 
+        player.items[item_choice]["quantity"] -= 1 # reduse the item quantity and save it in items object
+        
+        
         if item.type == "potion":
             player.heal(item.prop)
             print(Color.OKGREEN + "\n" + item.name + " Heals for", str(item.prop), "HP. " + Color.ENDC)
+
+        elif item.type == "elixir":
+            player.hp = player.max_hp
+            player.mp = player.max_mp
+            print(Color.OKGREEN + "\n" + item.name + " Fully restors HP/MP." + Color.ENDC)
+        
+        elif item.type == "attack":
+            enemy.take_damage(item.prop)
+            print(Color.OKBLUE + "\n" + item.name + " Deals", str(item.prop), "Points of Damage. " + Color.ENDC)
 
     # Enemy Turn
     enemy_choice = 1
