@@ -1,3 +1,5 @@
+import random
+
 from classes.game import Color, Player
 from classes.inventory import Item
 from classes.magic import Spell
@@ -31,7 +33,14 @@ player3 = Player("Habiba", 4000, 1500, 500, 34, player_magic_list, player_items_
 
 players = [player1, player2, player3]
 
-enemy = Player("Fire Dragon", 11200, 2200, 800, 25, [], [])
+enemy_magic_list = [fire, thunder, blizzard, cure]
+enemy_items_list = [potion, high_potion, super_potion, elixir, high_elixir, grenade]
+enemy1 = Player("Fire Dragon", 20200, 2200, 500, 25, enemy_magic_list, [])
+enemy2 = Player("Dark Elf   ", 1500, 200, 800, 300, enemy_magic_list, [])
+enemy3 = Player("Ghoul      ", 1300, 300, 900, 200, enemy_magic_list, [])
+
+enemies = [enemy1, enemy2, enemy3]
+
 
 running = True
 i = 0
@@ -50,7 +59,13 @@ while running:
         player.get_stats()
 
     print("\n")
-    
+
+    # Print Enemies Stats
+    for enemy in enemies: 
+        enemy.get_enemy_stats()
+        
+    print("\n")
+
     # Give Every Member A turn
     for player in players:
         
@@ -61,8 +76,14 @@ while running:
         # Normal Attack
         if player_choice == 0:
             damage = player.generate_damage()
+            enemy = player.choose_target(enemies)
+            
+            if enemy == None:
+                continue
+            
             enemy.take_damage(damage)
-            print(Color.OKBLUE + "\n You Attacked For", damage, "Points of Damage. " + Color.ENDC)
+
+            print(Color.OKBLUE + "\n You Attacked " + enemy.name + " For", damage, "Points of Damage. " + Color.ENDC)
 
         # Magic Attack
         elif player_choice == 1:
@@ -88,8 +109,13 @@ while running:
                 print(Color.OKGREEN + "\n" + spell.name + " Heals for", str(spell_damage), "HP. " + Color.ENDC)
 
             elif spell.type == "black":
+                enemy = player.choose_target(enemies)
+
+                if enemy == None:
+                    continue
+
                 enemy.take_damage(spell_damage)
-                print(Color.OKBLUE + "\n" + spell.name + " Deals", str(spell_damage), "Points of Damage. " + Color.ENDC)
+                print(Color.OKBLUE + "\n" + spell.name + " Deals With", str(spell_damage), "Points of Damage to " + enemy.name + Color.ENDC)
         
         # Items Attack
         elif player_choice == 2:
@@ -113,29 +139,75 @@ while running:
                 print(Color.OKGREEN + "\n" + item.name + " Heals for", str(item.prop), "HP. " + Color.ENDC)
 
             elif item.type == "elixir":
-                player.hp = player.max_hp
-                player.mp = player.max_mp
-                print(Color.OKGREEN + "\n" + item.name + " Fully restors HP/MP." + Color.ENDC)
+
+                if item.name == "High Elixir":
+                    for p in players:
+                        p.hp = p.max_hp
+                        p.mp = p.max_mp
+                        print(Color.OKGREEN + "\n" + item.name + " Fully restors "+ p.name +" HP/MP." + Color.ENDC)
+                
+                else:
+                    player.hp = player.max_hp
+                    player.mp = player.max_mp
+                    print(Color.OKGREEN + "\n" + item.name + " Fully restors HP/MP." + Color.ENDC)
+
             
             elif item.type == "attack":
+                enemy = player.choose_target(enemies)
+                
+                if enemy == None:
+                    continue
+
                 enemy.take_damage(item.prop)
-                print(Color.OKBLUE + "\n" + item.name + " Deals", str(item.prop), "Points of Damage. " + Color.ENDC)
+                print(Color.OKBLUE + "\n" + item.name + " Deals", str(item.prop), "Points of Damage to " + enemy.name + Color.ENDC)
 
-    # Enemy Turn
-    enemy_choice = 1
-    enemy_damage = enemy.generate_damage()
-    player1.take_damage(enemy_damage)
-    print("Enemy Attacked For", enemy_damage, "Points of Damage. ")
-
-    print('------------------------------------')
-    print("Enemy HP: " + Color.FAIL + str(enemy.get_hp()) + '/' + str(enemy.get_max_hp()) + Color.ENDC + "\n")
-    print("Player HP: " + Color.OKGREEN + str(player1.get_hp()) + '/' + str(player1.get_max_hp()) + Color.ENDC + "\n")
-    print("Player MP: " + Color.OKBLUE + str(player1.get_mp()) + '/' + str(player1.get_max_mp()) + Color.ENDC + "\n")
 
     # game continues check
-    if enemy.get_hp() == 0:
+    defeated_enemies = 0
+    defeated_players = 0
+    
+    # Check Defeated Enemies Count
+    for enemy in enemies:
+        if enemy.get_hp() == 0:
+            defeated_enemies += 1
+
+    # Check Defeated Players Count
+    for player in players:
+        if player.get_hp() == 0:
+            defeated_players += 1
+
+    if defeated_enemies == 2:
         print(Color.OKGREEN + "You Win!" + Color.ENDC)
         running = False
-    elif player1.get_hp() == 0:
+
+    elif defeated_players == 2:
         print(Color.FAIL + "You Loose!" + Color.ENDC)
         running = False
+
+    # Enemy Turn
+    for enemy in enemies:
+        enemy_choice = random.randrange(0, 2)
+
+        if enemy_choice == 0:
+            # Get Target Rand Start From 0 and end at 2 not 3 our limit is 3 
+            target = random.randrange(0, 3)
+            player_target = players[target]
+            enemy_damage = enemy.generate_damage()
+            
+            player_target.take_damage(enemy_damage)
+            print(Color.BOLD + Color.FAIL + "Enemy " + enemy.name.strip() + " Attacked "+ player_target.name +" For", enemy_damage, "Points of Damage. " + Color.ENDC)
+
+        elif enemy_choice == 1: 
+            spell, magic_damage = enemy.choose_enemy_spell()
+            enemy.reduce_mp(spell.cost)
+            
+            if spell.type == "white":
+                enemy.heal(magic_damage)
+                print(Color.OKGREEN + "\n" + spell.name.strip() + " Heals " + enemy.name + " for", str(magic_damage), "HP. " + Color.ENDC)
+
+            elif spell.type == "black":
+                # Get Target Rand Start From 0 and end at 2 not 3 our limit is 3 
+                target = random.randrange(0, 3)
+                player_target = players[target]
+                player_target.take_damage(magic_damage)
+                print(Color.BOLD + Color.FAIL + "\n" + spell.name + " Deals With", str(magic_damage), "Points of Damage to " + player_target.name + Color.ENDC)

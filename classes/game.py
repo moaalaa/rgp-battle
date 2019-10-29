@@ -30,6 +30,7 @@ class Player:
         self.magic = magic
         self.items = items
         self.actions = ["Attack", "Magic", "Items"]
+        self.actions = ["Attack", "Magic", "Items"]
 
     def generate_damage(self):
         return random.randrange(self.attack_low, self.attack_high)
@@ -85,6 +86,68 @@ class Player:
         for item_dictionary in self.items:
             print("        " + str(item_index) + ": " + item_dictionary["item"].name, Color.FAIL + Color.BOLD + "(x" + str(item_dictionary["quantity"])  + ")", Color.WARNING + Color.BOLD + "(" + item_dictionary["item"].description  + ")" + Color.ENDC)
             item_index += 1
+
+    def choose_target(self, enemies):
+        index = 1
+        
+        print("\n" + Color.FAIL + Color.BOLD + "    TARGET: " + Color.ENDC)
+
+        for enemy in enemies:
+            if enemy.get_hp() != 0:
+                print("        " + str(index) + ":" + enemy.name)
+                index += 1
+
+        choice = int(input("    Choose Target: ")) - 1
+        
+        if enemies[choice].get_hp() == 0:
+            print(Color.OKBLUE + Color.BOLD + " Enemy " + enemies[choice].name.strip() + " has Been Dead!")
+            del enemies[choice]
+            return None
+        
+        return enemies[choice]
+
+    def get_enemy_stats(self):
+        """
+            Our HP bar Consists of 25 chars and if it's 100% so it can divided by 2 half
+                
+                HP  / Max HP    Get Result Percentage   Divide By 2 And Get Half Value
+            Ex: (50 / 200 )      * 100                  / 2
+        """
+        hp_bar = ""
+        hp_bar_ticks = (self.hp / self.max_hp) * 100 / 2
+
+        # Generate HP Bar ticks
+        while hp_bar_ticks > 0:
+            hp_bar += "█"
+            hp_bar_ticks -= 1
+        
+        # Generate HP Bar White Spaces
+        while len(hp_bar) < 50:
+            hp_bar += " "
+
+        # Generate proper white spaces for enemy states
+        hp_string = str(self.hp) + "/" + str(self.max_hp)
+        current_hp = ""
+
+        """
+            11 stands for the complete 11 chars in HP status
+            11200/11200
+        """
+        if len(hp_string) < 11:
+            decreased = 11 - len(hp_string)
+
+            while decreased > 0:
+                current_hp += " "
+                decreased -= 1
+
+            current_hp += hp_string
+        else:
+            current_hp = hp_string
+        
+        # Print Stats
+        print("\n")
+        print(Color.BOLD + self.name + "                      " + 
+                   current_hp + " |" + Color.FAIL + hp_bar + Color.ENDC +"|")
 
     def get_stats(self):
         """
@@ -165,3 +228,14 @@ class Player:
         print(Color.BOLD + self.name[0:4] + "                      " + 
                    current_hp + " |" + Color.OKGREEN + hp_bar + Color.ENDC +"|                " + Color.BOLD +
                    current_mp + " |" + Color.OKBLUE  + mp_bar + Color.ENDC + "|")
+    
+    def choose_enemy_spell(self):
+        magic_choice = random.randrange(0, len(self.magic))
+        spell = self.magic[magic_choice]
+        magic_damage = spell.generate_damage()
+
+        # If Spell Cost Greater Than Player "MP" Return To Choose Action Menu 
+        if spell.cost > self.mp:
+            self.choose_enemy_spell()    
+        else:
+            return spell, magic_damage
